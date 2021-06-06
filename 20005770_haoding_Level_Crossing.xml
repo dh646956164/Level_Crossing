@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+chan approachTrain ,barrierDown,barrierUp,moveBarrierUp, moveBarrierDown,carMoved,greenLightOn; </declaration>
+	<template>
+		<name x="5" y="5">Train</name>
+		<declaration>// Place local declarations here.
+int   [27,75] tArrive;
+int t = 0;</declaration>
+		<location id="id0" x="-102" y="-110">
+			<name x="-102" y="-144">Approach</name>
+		</location>
+		<location id="id1" x="154" y="-110">
+			<name x="154" y="-161">Cross</name>
+		</location>
+		<location id="id2" x="-305" y="-34">
+			<name x="-315" y="-68">Safe</name>
+		</location>
+		<init ref="id2"/>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-25" y="-136">t &gt; tArrive</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-272" y="-119">approachTrain!</label>
+			<label kind="assignment" x="-246" y="-102">t = 0</label>
+			<nail x="-271" y="-51"/>
+			<nail x="-254" y="-59"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="guard" x="162" y="-255">t &lt;= tArrive + 5</label>
+			<label kind="assignment" x="162" y="-221">t = t + 1</label>
+			<nail x="103" y="-238"/>
+			<nail x="349" y="-212"/>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-238" y="-263">t &lt;= tArrive</label>
+			<label kind="assignment" x="-229" y="-229">t= t + 1</label>
+			<nail x="-263" y="-161"/>
+			<nail x="-136" y="-238"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="94" y="-25">t &gt; tArrive +5</label>
+			<label kind="synchronisation" x="94" y="9">moveBarrierUp!</label>
+			<nail x="9" y="102"/>
+		</transition>
+	</template>
+	<template>
+		<name>Traffic</name>
+		<declaration>int t = 0;</declaration>
+		<location id="id3" x="-357" y="-136">
+			<name x="-382" y="-170">Green</name>
+		</location>
+		<location id="id4" x="-85" y="-136">
+			<name x="-110" y="-127">Amber</name>
+		</location>
+		<location id="id5" x="136" y="-127">
+			<name x="126" y="-161">Red</name>
+		</location>
+		<location id="id6" x="-136" y="85">
+			<name x="-161" y="102">SemiAmber</name>
+		</location>
+		<init ref="id3"/>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-348" y="-34">greenLightOn!</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id6"/>
+			<label kind="guard" x="0" y="25">t &gt; 3</label>
+			<label kind="synchronisation" x="-25" y="42">barrierUp?</label>
+			<nail x="-119" y="76"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-119" y="-263">t &lt;= 3</label>
+			<label kind="assignment" x="-119" y="-229">t = t + 1</label>
+			<nail x="-178" y="-229"/>
+			<nail x="8" y="-255"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="guard" x="8" y="-161">t &gt; 3</label>
+			<label kind="synchronisation" x="-34" y="-127">moveBarrierDown!</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-306" y="-161">approachTrain?</label>
+			<label kind="assignment" x="-272" y="-136">t = 0</label>
+		</transition>
+	</template>
+	<template>
+		<name>Car</name>
+		<location id="id7" x="-229" y="-42">
+			<name x="-306" y="-93">Approaching</name>
+		</location>
+		<location id="id8" x="-25" y="-51">
+			<name x="-35" y="-85">Crossing</name>
+		</location>
+		<location id="id9" x="221" y="-51">
+			<name x="211" y="-85">Crossed</name>
+		</location>
+		<location id="id10" x="-34" y="59">
+			<name x="-59" y="85">WaitTrainPass</name>
+		</location>
+		<init ref="id7"/>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id7"/>
+			<nail x="-34" y="-238"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id8"/>
+			<label kind="synchronisation" x="-153" y="-68">greenLightOn?</label>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id9"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id8"/>
+			<label kind="synchronisation" x="-17" y="-17">greenLightOn?</label>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="-195" y="25">barrierDown?</label>
+		</transition>
+	</template>
+	<template>
+		<name>Barrier</name>
+		<declaration>int t = 0;
+int [4,6] descendTime;</declaration>
+		<location id="id11" x="-416" y="-187">
+			<name x="-426" y="-221">Up</name>
+		</location>
+		<location id="id12" x="-127" y="-178">
+			<name x="-137" y="-212">GoingDown</name>
+		</location>
+		<location id="id13" x="-136" y="25">
+			<name x="-144" y="42">Down</name>
+		</location>
+		<location id="id14" x="-425" y="17">
+			<name x="-425" y="-17">GoingUp</name>
+		</location>
+		<init ref="id11"/>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id14"/>
+			<label kind="guard" x="-663" y="68">t &lt;= descendTime</label>
+			<label kind="assignment" x="-586" y="42">t = t +1</label>
+			<nail x="-527" y="8"/>
+			<nail x="-544" y="102"/>
+		</transition>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-144" y="-297">t &lt;= descendTime</label>
+			<label kind="assignment" x="-119" y="-272">t = t + 1</label>
+			<nail x="-204" y="-280"/>
+			<nail x="25" y="-272"/>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id11"/>
+			<label kind="guard" x="-408" y="-119">t &gt; descendTime</label>
+			<label kind="synchronisation" x="-408" y="-102">barrierUp!</label>
+		</transition>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id14"/>
+			<label kind="synchronisation" x="-340" y="-8">moveBarrierUp?</label>
+			<label kind="assignment" x="-323" y="17">t = 0</label>
+		</transition>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id13"/>
+			<label kind="guard" x="-102" y="-119">t &gt; descendTime</label>
+			<label kind="synchronisation" x="-110" y="-93">barrierDown!</label>
+		</transition>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id12"/>
+			<label kind="synchronisation" x="-340" y="-204">moveBarrierDown?</label>
+			<label kind="assignment" x="-297" y="-187">t = 0</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+PTrain = Train();
+PTraffic = Traffic();
+PBarrier = Barrier();
+PCar = Car();
+// List one or more processes to be composed into a system.
+system PTrain,PTraffic,PBarrier,PCar;
+    </system>
+	<queries>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment>System has no deadlock</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; not (PCar.Crossing and PBarrier.Down)</formula>
+			<comment>Car cannot cross the barrier when the barrier is down</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; PTrain.Approach and PTraffic.Amber</formula>
+			<comment>Light turns to amber when the train approaches</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; PTrain.Cross</formula>
+			<comment>Train can finally cross the junction</comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; PCar.Crossing and PTraffic.Green</formula>
+			<comment>Car can only cross when the traffic light is green</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; PTraffic.Red and (PBarrier.GoingDown  or PBarrier.Down)</formula>
+			<comment>When right traffic lights turn red, the barrier goes down and stays down when the color is still red</comment>
+		</query>
+	</queries>
+</nta>
